@@ -1,5 +1,6 @@
 using good_hamburguer_system.Application.Services;
 using good_hamburguer_system.Infrastructure.Repositories;
+using good_hamburguer_system.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +15,7 @@ builder.Services.AddScoped<PedidoService>();
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionMiddleware>();
 app.UseSwagger();
 app.UseSwaggerUI();
 

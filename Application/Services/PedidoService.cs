@@ -1,6 +1,7 @@
 using good_hamburguer_system.Application.DTOs;
 using good_hamburguer_system.Domain.Entities;
 using good_hamburguer_system.Domain.Exceptions;
+using good_hamburguer_system.Domain.Enums;
 
 namespace good_hamburguer_system.Application.Services
 {
@@ -8,14 +9,33 @@ namespace good_hamburguer_system.Application.Services
     {
         public Pedido CriarPedido(PedidoRequestDto dto)
         {
+            if (dto.Itens == null || !dto.Itens.Any())
+                throw new BusinessException("Pedido deve conter ao menos um item.");
+
+            var itens = dto.Itens
+                .Select(nome =>
+                {
+                    if (string.IsNullOrWhiteSpace(nome))
+                        throw new BusinessException("Item inválido: nome vazio.");
+
+                    var item = CardapioService.ObterPorNome(nome);
+
+                    if (item == null)
+                        throw new BusinessException($"Item '{nome}' não existe.");
+
+                    return item;
+                })
+                .ToList();
+
+            ValidarDuplicados(itens);
+
             var pedido = new Pedido
             {
-                Sanduiche = dto.Sanduiche != null ? CardapioService.ObterPorNome(dto.Sanduiche) : null,
-                Batata = dto.Batata != null ? CardapioService.ObterPorNome(dto.Batata) : null,
-                Refrigerante = dto.Refrigerante != null ? CardapioService.ObterPorNome(dto.Refrigerante) : null
+                Sanduiche = itens.FirstOrDefault(i => i.Tipo == TipoItem.Sanduiche),
+                Batata = itens.FirstOrDefault(i => i.Tipo == TipoItem.Batata),
+                Refrigerante = itens.FirstOrDefault(i => i.Tipo == TipoItem.Refrigerante)
             };
 
-            Validar(pedido);
             Calcular(pedido);
 
             return pedido;
@@ -26,8 +46,28 @@ namespace good_hamburguer_system.Application.Services
             if (pedido.Sanduiche == null && pedido.Batata == null && pedido.Refrigerante == null)
                 throw new BusinessException("Pedido vazio não é permitido.");
 
-            if (pedido.Sanduiche?.Tipo != null && pedido.Sanduiche.Tipo != Domain.Enums.TipoItem.Sanduiche)
-                throw new BusinessException("Item inválido para sanduíche.");
+            var tipos = new List<TipoItem>();
+
+            if (pedido.Sanduiche != null) tipos.Add(TipoItem.Sanduiche);
+            if (pedido.Batata != null) tipos.Add(TipoItem.Batata);
+            if (pedido.Refrigerante != null) tipos.Add(TipoItem.Refrigerante);
+
+            if (tipos.Count != tipos.Distinct().Count())
+                throw new BusinessException("Pedido contém itens duplicados por categoria.");
+        }
+
+        private void ValidarDuplicados(List<ItemMenu> itens)
+        {
+            var agrupados = itens
+                .GroupBy(i => i.Tipo)
+                .Where(g => g.Count() > 1)
+                .ToList();
+
+            if (agrupados.Any())
+            {
+                var tiposDuplicados = string.Join(", ", agrupados.Select(g => g.Key));
+                throw new BusinessException($"Itens duplicados para: {tiposDuplicados}");
+            }
         }
 
         private void Calcular(Pedido pedido)
@@ -37,20 +77,23 @@ namespace good_hamburguer_system.Application.Services
                 pedido.Sanduiche,
                 pedido.Batata,
                 pedido.Refrigerante
-            }.Where(i => i != null).ToList();
+            }
+            .Where(i => i != null)
+            .Select(i => i!)
+            .ToList();
 
-            pedido.Subtotal = itens.Sum(i => i!.Preco);
+            pedido.Subtotal = itens.Sum(i => i.Preco);
 
-            decimal desconto = 0;
+            decimal percentualDesconto = 0;
 
-            if (itens.Count == 3)
-                desconto = 0.20m;
+            if (pedido.Sanduiche != null && pedido.Batata != null && pedido.Refrigerante != null)
+                percentualDesconto = 0.20m;
             else if (pedido.Sanduiche != null && pedido.Refrigerante != null)
-                desconto = 0.15m;
+                percentualDesconto = 0.15m;
             else if (pedido.Sanduiche != null && pedido.Batata != null)
-                desconto = 0.10m;
+                percentualDesconto = 0.10m;
 
-            pedido.Desconto = pedido.Subtotal * desconto;
+            pedido.Desconto = pedido.Subtotal * percentualDesconto;
             pedido.Total = pedido.Subtotal - pedido.Desconto;
         }
     }
