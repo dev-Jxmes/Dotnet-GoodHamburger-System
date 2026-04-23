@@ -1,6 +1,0 @@
-@good_hamburguer_system_HostAddress = http://localhost:5197
-
-GET {{good_hamburguer_system_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###
