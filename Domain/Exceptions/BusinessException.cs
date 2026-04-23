@@ -1,7 +1,10 @@
 namespace good_hamburguer_system.Domain.Exceptions
 {
-    public class BusinessException : Exception
+    public class BusinessException : AppException
     {
-        public BusinessException(string message) : base(message) { }
+        public BusinessException(string message)
+            : base(message, 400)
+        {
+        }
     }
 }

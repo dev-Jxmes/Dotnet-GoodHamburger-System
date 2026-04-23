@@ -17,7 +17,13 @@ namespace good_hamburguer_system.Application.Services
 
         public static ItemMenu? ObterPorNome(string nome)
         {
-            return Itens.FirstOrDefault(i => i.Nome.Equals(nome, StringComparison.OrdinalIgnoreCase));
+            if (string.IsNullOrWhiteSpace(nome))
+                return null;
+
+            nome = nome.Trim();
+
+            return Itens.FirstOrDefault(i =>
+                i.Nome.Equals(nome, StringComparison.OrdinalIgnoreCase));
         }
     }
 }
