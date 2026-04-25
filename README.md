@@ -8,7 +8,8 @@ This is a basic system management for fast foods delivery.
 - ASP.NET Core
 
 ## Como rodar
-dotnet run
+dotnet run / dotnet watch run
+
 
 ## Swagger
 https://localhost:5197/swagger
