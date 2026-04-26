@@ -18,7 +18,7 @@ API REST para gestão de pedidos de hambúrgueres, desenvolvida em **.NET 8 (LTS
 
 ```bash
 git clone https://github.com/dev-Jxmes/Dotnet-GoodHamburger-System.git
-cd Dotnet-GoodHamburger-System
+cd Dotnet-GoodHamburger-System/src
 ```
 
 
