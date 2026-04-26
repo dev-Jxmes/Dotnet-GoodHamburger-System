@@ -114,13 +114,53 @@ A API possui um middleware global que retorna respostas padronizadas:
 * Uso de exceções customizadas para controle de fluxo
 
 
+## Testes Automatizados
+
+O projeto possui testes unitários focados nas regras de negócio do sistema de pedidos.
+
+
+### Tecnologias utilizadas
+
+* xUnit
+* FluentAssertions
+
+
+### Como executar os testes
+
+Na raiz do projeto, execute:
+
+```bash
+dotnet test GoodHamburger.sln
+```
+
+
+### O que está sendo testado
+
+#### Regras de desconto
+
+* Sanduíche + Batata + Refrigerante → 20%
+* Sanduíche + Refrigerante → 15%
+* Sanduíche + Batata → 10%
+* Pedido com apenas um item → sem desconto
+
+
+#### Validações
+
+* Pedido vazio
+* Item inexistente no cardápio
+* Duplicidade de itens por categoria (ex: dois sanduíches)
+
+
+#### Edge cases
+
+* Entrada com espaços extras (ex: `"  X Bacon  "`)
+* Ordem dos itens não influencia o resultado
+
+
 ## Melhorias futuras
 
 * Persistência com banco de dados (EF Core)
-* Autenticação e autorização
-* Testes de integração
-* Versionamento da API
-* Deploy automatizado (CI/CD)
+* Frontend em Blazor consumindo a API
 
 
 ## Autor
