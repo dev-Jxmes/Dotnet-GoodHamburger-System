@@ -422,6 +422,10 @@ autom4te.cache/
 tarballs/
 test-results/
 
+# Tests
+TestResults/
+coverage/
+
 # Mac bundle stuff
 *.dmg
 *.app
